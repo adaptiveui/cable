@@ -19,7 +19,7 @@ test('Cable Walk Tree', (test) => {
     one: {
       two: {
         three: {
-          value:1
+          value: 1
         }
       }
     }
@@ -157,7 +157,6 @@ test('Cable Signal-Slot Pattern', (test) => {
 
 });
 
-
 test('Cable Helper Methods', (test) => {
 
   const cable = Cable({});
@@ -171,7 +170,6 @@ test('Cable Helper Methods', (test) => {
   test.end();
 
 });
-
 
 test('Cable Sparse Tree', (test) => {
 
@@ -203,7 +201,6 @@ test('Cable Sparse Tree', (test) => {
   test.end();
 
 });
-
 
 test('Cable Internal Bridging', (test) => {
 
@@ -290,6 +287,42 @@ test('Cable Graph Bridging', (test) => {
 
   cable1.publish.A(1);
   cable1.publish.A.broadcast(1);
+  test.end();
+
+});
+
+test('Cable Receipt', (test) => {
+
+  const cable = Cable({});
+
+  cable.channel('B.A');
+  cable.channel('B.B');
+  cable.channel('B.C');
+  cable.channel('B.C.A');
+
+  test.plan(8);
+
+  cable.subscribe.B(function(value) {
+    test.equal(value, 1, 'local calls');
+    return 1;
+  });
+  cable.subscribe.B.B(function(value) {
+    test.equal(value, 1, 'broadcast to level1-child1');
+    return 1;
+  });
+  cable.subscribe.B.C(function(value) {
+    test.equal(value, 1, 'broadcast to level1-child2');
+    return 1;
+  });
+  cable.subscribe.B.C.A(function(value) {
+    test.equal(value, 1, 'broadcast to level2-child1');
+    return 1;
+  });
+
+  cable.publish.B.receipt(function(value) {
+    test.equal(value, 1, 'receipt is always 1');
+  }).broadcast(1);
+
   test.end();
 
 });
