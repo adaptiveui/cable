@@ -54,6 +54,12 @@ A cable object is Mediator. It is a hub for messaging multiple events along chan
 const cable = Cable();
 ```
 
+The `Cable` object takes the following configuration properties.
+
+| Property       | Type        | Purpose                                                    |
+|:---------------|:------------|:-----------------------------------------------------------|
+| `asynchronous` | __boolean__ | All publish calls happen after the current stack has ended |
+
 #### Channels
 
 Every message sent on `Cable` must be through a pre-defined channel. Every channel creates a signal function which traps all of the listeners (slots) attached to it.
