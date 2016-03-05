@@ -2,9 +2,14 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 # Changelog
 
+- [1.1.0](#110)
 - [1.0.0](#100)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+### 1.1.0
+
+* ADDED receipt function so the caller can be notified of each cable sent
 
 ### 1.0.0
 

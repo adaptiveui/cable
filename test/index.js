@@ -4,7 +4,7 @@ import Cable from '../lib'
 
 test('Cable Creation', (test) => {
 
-  const cable = Cable({ asynchronous: false });
+  const cable = Cable({asynchronous: false});
 
   test.deepEqual(typeof cable.__channels__, 'object', 'cable has channels');
   test.deepEqual(typeof cable.publish, 'function', 'cable has publish');
@@ -291,39 +291,38 @@ test('Cable Graph Bridging', (test) => {
 
 });
 
-/*
- test('Cable Receipt', (test) => {
+test('Cable Receipt', (test) => {
 
- const cable = Cable({ asynchronous: false });
+  const cable = Cable({asynchronous: false});
 
- cable.channel('B.A');
- cable.channel('B.B');
- cable.channel('B.C');
- cable.channel('B.C.A');
+  cable.channel('B.A');
+  cable.channel('B.B');
+  cable.channel('B.C');
+  cable.channel('B.C.A');
 
- test.plan(8);
+  test.plan(8);
 
- cable.subscribe.B(function(value) {
- test.equal(value, 1, 'local calls');
- return 1;
- });
- cable.subscribe.B.B(function(value) {
- test.equal(value, 1, 'broadcast to level1-child1');
- return 1;
- });
- cable.subscribe.B.C(function(value) {
- test.equal(value, 1, 'broadcast to level1-child2');
- return 1;
- });
- cable.subscribe.B.C.A(function(value) {
- test.equal(value, 1, 'broadcast to level2-child1');
- return 1;
- });
+  cable.subscribe.B(function(value) {
+    test.equal(value, 1, 'local calls');
+    return 1;
+  });
+  cable.subscribe.B.B(function(value) {
+    test.equal(value, 1, 'broadcast to level1-child1');
+    return 1;
+  });
+  cable.subscribe.B.C(function(value) {
+    test.equal(value, 1, 'broadcast to level1-child2');
+    return 1;
+  });
+  cable.subscribe.B.C.A(function(value) {
+    test.equal(value, 1, 'broadcast to level2-child1');
+    return 1;
+  });
 
- cable.publish.B.receipt(function(value) {
- test.equal(value, 1, 'receipt is always 1');
- }).broadcast(1);
+  cable.publish.B.receipt(function(value) {
+    test.equal(value, 1, 'receipt is always 1');
+  }).broadcast(1);
 
- test.end();
+  test.end();
 
- });*/
+});
