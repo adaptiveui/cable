@@ -6,8 +6,8 @@ test('Cable Creation', (test) => {
 
   const cable = new Cable();
 
-  test.equal(cable.id, 'root', 'without any channel name a cable is the root');
-  test.equal(cable.channelPath, 'root', 'channel returns the channel of a cable');
+  test.equal(cable.channel, 'root', 'without any channel name a cable is the root');
+  test.equal(cable.uniquePath, 'root-' + cable.id, 'channel returns the channel of a cable');
   test.equal(cable.parentPath, '', 'with a parent a cable has not path');
   test.end();
 });
@@ -199,6 +199,8 @@ test('Cable Auto-Attach Children', (test) => {
 test('Cable Internal Bridging', (test) => {
 
   const cable = new Cable();
+
+  // TODO how do we distinguish between cables? The root is the same for double calls
 
   cable.channel('A.A');
   cable.channel('A.B');
