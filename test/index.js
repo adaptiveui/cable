@@ -33,6 +33,26 @@ test('Cable Channel Definition', (test) => {
 
 });
 
+test('Cable Parent Chain', (test) => {
+
+  const cable = new Cable();
+
+  cable.channel('W/A/B/X/Y/Z');
+
+  test.equal(cable.id, 'root', 'undefined cables are root');
+  test.equal(cable.W.id, 'W', '(W) id is the name of the cable');
+  test.equal(cable.W.A.id, 'A', '(A) id is the name of the cable');
+  test.equal(cable.W.A.B.id, 'B', '(B) id is the name of the cable');
+
+  test.equal(cable.parentPath, '', 'cable has no parent');
+  test.equal(cable.W.parentPath, 'root', 'parent path of parent');
+  test.equal(cable.W.A.parentPath, 'root-W', 'parent path of parent');
+  test.equal(cable.W.A.B.parentPath, 'root-W-A', 'parent path of parent');
+  test.equal(cable.W.A.B.X.parentPath, 'root-W-A-B', 'parent path of parent');
+  test.end();
+
+});
+
 test('Cable Prevent Duplicate Channel Definitions', (test) => {
 
   const cable = new Cable();
@@ -172,124 +192,99 @@ test('Cable Auto-Attach Children', (test) => {
     test.equal(value, 4, 'publish sent 4 on channel one.twoC.threeC');
   });
 
-
   cable.one.twoC.broadcast(4);
 
 });
 
-/* -- is this useful?
- test('Cable Walk Tree', (test) => {
+test('Cable Internal Bridging', (test) => {
 
- const cable = Cable();
- const tree = {
- one: {
- two: {
- three: {
- value: 1
- }
- }
- }
- };
- const subtree = cable.walkParents(tree, ['one', 'two']);
+  const cable = new Cable();
 
- test.deepEqual(subtree.three.value, 1, 'walks into objects');
- test.end();
- });
- */
+  cable.channel('A.A');
+  cable.channel('A.B');
+  cable.channel('B.A');
+  cable.channel('B.B');
 
+  cable.bridge('B', 'A');
 
+  test.plan(3);
+
+  cable.B.subscribe(function(value) {
+    test.equal(value, 1, 'bridge is called with local calls and broadcasts');
+  });
+  cable.B.B.subscribe(function(value) {
+    test.equal(value, 1, 'bridge calls with broadcasts');
+  });
+
+  cable.A.publish(1);
+  cable.A.broadcast(1);
+
+});
+
+test('Cable External Bridging', (test) => {
+
+  const cable1 = new Cable();
+  const cable2 = new Cable();
+
+  cable1.channel('A.A');
+  cable1.channel('A.B');
+  cable2.channel('B.A');
+  cable2.channel('B.B');
+
+  cable1.bridge(cable2.lookup('B'), 'A');
+
+  test.plan(3);
+
+  cable2.B.subscribe(function(value) {
+    test.equal(value, 1, 'bridge is called with local calls and broadcasts');
+  });
+  cable2.B.B.subscribe(function(value) {
+    test.equal(value, 1, 'bridge calls with broadcasts');
+  });
+
+  cable1.A.publish(1);
+  cable1.A.broadcast(1);
+
+});
 /*
 
+test('Cable Recursive Bridging', (test) => {
 
+  const cable1 = new Cable();
+  const cable2 = new Cable();
 
- test('Cable Internal Bridging', (test) => {
+  cable1.channel('A.A');
+  cable1.channel('A.B');
+  cable2.channel('B.A');
+  cable2.channel('B.B');
+  cable2.channel('B.C');
+  cable2.channel('B.C.A');
 
- const cable = Cable();
+  cable1.bridge(cable2.lookup('B'), 'A');
+  cable2.bridge(cable1.lookup('A'), 'B');
 
- cable.channel('A.A');
- cable.channel('A.B');
- cable.channel('B.A');
- cable.channel('B.B');
+  test.plan(5);
 
- cable.bridge('A', 'B');
+  cable2.B.subscribe(function(value) {
+    test.equal(value, 1, 'local calls');
+  });
+  cable2.B.B.subscribe(function(value) {
+    test.equal(value, 1, 'broadcast to level1-child1');
+  });
+  cable2.B.C.subscribe(function(value) {
+    test.equal(value, 1, 'broadcast to level1-child2');
+  });
+  cable2.B.C.A.subscribe(function(value) {
+    test.equal(value, 1, 'broadcast to level2-child1');
+  });
 
- test.plan(3);
+  cable1.A.publish(1);
+  cable1.A.broadcast(1);
 
- cable.subscribe.B(function(value) {
- test.equal(value, 1, 'bridge is called with local calls and broadcasts');
- });
- cable.subscribe.B.B(function(value) {
- test.equal(value, 1, 'bridge calls with broadcasts');
- });
+});
+*/
 
- cable.publish.A(1);
- cable.publish.A.broadcast(1);
- test.end();
-
- });
-
- test('Cable External Bridging', (test) => {
-
- const cable1 = Cable();
- const cable2 = Cable();
-
- cable1.channel('A.A');
- cable1.channel('A.B');
- cable2.channel('B.A');
- cable2.channel('B.B');
-
- cable1.bridge('A', cable2.publish('B'));
-
- test.plan(3);
-
- cable2.subscribe.B(function(value) {
- test.equal(value, 1, 'bridge is called with local calls and broadcasts');
- });
- cable2.subscribe.B.B(function(value) {
- test.equal(value, 1, 'bridge calls with broadcasts');
- });
-
- cable1.publish.A(1);
- cable1.publish.A.broadcast(1);
- test.end();
-
- });
-
- test('Cable Graph Bridging', (test) => {
-
- const cable1 = Cable();
- const cable2 = Cable();
-
- cable1.channel('A.A');
- cable1.channel('A.B');
- cable2.channel('B.A');
- cable2.channel('B.B');
- cable2.channel('B.C');
- cable2.channel('B.C.A');
-
- cable1.bridge('A', cable2.publish('B'));
- cable2.bridge('B', cable1.publish('A'));
-
- test.plan(5);
-
- cable2.subscribe.B(function(value) {
- test.equal(value, 1, 'local calls');
- });
- cable2.subscribe.B.B(function(value) {
- test.equal(value, 1, 'broadcast to level1-child1');
- });
- cable2.subscribe.B.C(function(value) {
- test.equal(value, 1, 'broadcast to level1-child2');
- });
- cable2.subscribe.B.C.A(function(value) {
- test.equal(value, 1, 'broadcast to level2-child1');
- });
-
- cable1.publish.A(1);
- cable1.publish.A.broadcast(1);
- test.end();
-
- });
+/*
 
  test('Cable Receipt', (test) => {
 
