@@ -250,7 +250,6 @@ test('Cable External Bridging', (test) => {
 
 });
 
-/*
 test('Cable Recursive Bridging', (test) => {
 
   const cable1 = new Cable();
@@ -266,7 +265,7 @@ test('Cable Recursive Bridging', (test) => {
   cable1.bridge(cable2.lookup('B'), 'A');
   cable2.bridge(cable1.lookup('A'), 'B');
 
-  test.plan(5);
+  test.plan(4);
 
   cable2.B.subscribe(function(value) {
     test.equal(value, 1, 'local calls');
@@ -285,7 +284,7 @@ test('Cable Recursive Bridging', (test) => {
   cable1.A.broadcast(1);
 
 });
-*/
+
 
 /*
 
