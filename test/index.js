@@ -6,9 +6,10 @@ test('Cable Creation', (test) => {
 
   const cable = new Cable();
 
-  test.equal(cable.channel, 'root', 'without any channel name a cable is the root');
+  test.equal(cable.channelName, 'root', 'without any channel name a cable is the root');
+  test.equal(cable.parentsPath, '', 'with a parent a cable has not path');
   test.equal(cable.uniquePath, 'root-' + cable.id, 'channel returns the channel of a cable');
-  test.equal(cable.parentPath, '', 'with a parent a cable has not path');
+  test.equal(cable.root, undefined, 'cable root is empty if none defined');
   test.end();
 });
 
@@ -39,16 +40,16 @@ test('Cable Parent Chain', (test) => {
 
   cable.channel('W/A/B/X/Y/Z');
 
-  test.equal(cable.id, 'root', 'undefined cables are root');
-  test.equal(cable.W.id, 'W', '(W) id is the name of the cable');
-  test.equal(cable.W.A.id, 'A', '(A) id is the name of the cable');
-  test.equal(cable.W.A.B.id, 'B', '(B) id is the name of the cable');
+  test.equal(cable.channelName, 'root', 'undefined cables are root');
+  test.equal(cable.W.channelName, 'W', '(W) id is the name of the cable');
+  test.equal(cable.W.A.channelName, 'A', '(A) id is the name of the cable');
+  test.equal(cable.W.A.B.channelName, 'B', '(B) id is the name of the cable');
 
-  test.equal(cable.parentPath, '', 'cable has no parent');
-  test.equal(cable.W.parentPath, 'root', 'parent path of parent');
-  test.equal(cable.W.A.parentPath, 'root-W', 'parent path of parent');
-  test.equal(cable.W.A.B.parentPath, 'root-W-A', 'parent path of parent');
-  test.equal(cable.W.A.B.X.parentPath, 'root-W-A-B', 'parent path of parent');
+  test.equal(cable.parentsPath, '', 'cable has no parent');
+  test.equal(cable.W.parentsPath, 'root', 'parent path of parent');
+  test.equal(cable.W.A.parentsPath, 'root-W', 'parent path of parent');
+  test.equal(cable.W.A.B.parentsPath, 'root-W-A', 'parent path of parent');
+  test.equal(cable.W.A.B.X.parentsPath, 'root-W-A-B', 'parent path of parent');
   test.end();
 
 });
@@ -248,43 +249,44 @@ test('Cable External Bridging', (test) => {
   cable1.A.broadcast(1);
 
 });
+
 /*
 
-test('Cable Recursive Bridging', (test) => {
+ test('Cable Recursive Bridging', (test) => {
 
-  const cable1 = new Cable();
-  const cable2 = new Cable();
+ const cable1 = new Cable();
+ const cable2 = new Cable();
 
-  cable1.channel('A.A');
-  cable1.channel('A.B');
-  cable2.channel('B.A');
-  cable2.channel('B.B');
-  cable2.channel('B.C');
-  cable2.channel('B.C.A');
+ cable1.channel('A.A');
+ cable1.channel('A.B');
+ cable2.channel('B.A');
+ cable2.channel('B.B');
+ cable2.channel('B.C');
+ cable2.channel('B.C.A');
 
-  cable1.bridge(cable2.lookup('B'), 'A');
-  cable2.bridge(cable1.lookup('A'), 'B');
+ cable1.bridge(cable2.lookup('B'), 'A');
+ cable2.bridge(cable1.lookup('A'), 'B');
 
-  test.plan(5);
+ test.plan(5);
 
-  cable2.B.subscribe(function(value) {
-    test.equal(value, 1, 'local calls');
-  });
-  cable2.B.B.subscribe(function(value) {
-    test.equal(value, 1, 'broadcast to level1-child1');
-  });
-  cable2.B.C.subscribe(function(value) {
-    test.equal(value, 1, 'broadcast to level1-child2');
-  });
-  cable2.B.C.A.subscribe(function(value) {
-    test.equal(value, 1, 'broadcast to level2-child1');
-  });
+ cable2.B.subscribe(function(value) {
+ test.equal(value, 1, 'local calls');
+ });
+ cable2.B.B.subscribe(function(value) {
+ test.equal(value, 1, 'broadcast to level1-child1');
+ });
+ cable2.B.C.subscribe(function(value) {
+ test.equal(value, 1, 'broadcast to level1-child2');
+ });
+ cable2.B.C.A.subscribe(function(value) {
+ test.equal(value, 1, 'broadcast to level2-child1');
+ });
 
-  cable1.A.publish(1);
-  cable1.A.broadcast(1);
+ cable1.A.publish(1);
+ cable1.A.broadcast(1);
 
-});
-*/
+ });
+ */
 
 /*
 
