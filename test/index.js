@@ -106,6 +106,28 @@ test('Cable Children Publish/Subscribe', (test) => {
   });
 });
 
+test('Cable Children Emit/Subscribe', (test) => {
+
+  const cable = new Cable();
+  var walkCable = cable;
+
+  cable.channel('one');
+  cable.channel('one.two');
+  cable.channel('one.two.three');
+  cable.channel('one.two.three.four');
+
+  test.plan(3);
+
+  _.each(['one', 'two', 'three'], function(childrenName, key) {
+    walkCable[childrenName].subscribe(function(v) {
+      test.equal(v, 1, '1 is sent to all');
+    });
+    walkCable = walkCable[childrenName];
+  });
+
+  cable.one.two.three.four.emit(1);
+});
+
 test('Cable Signal-Slot Pattern', (test) => {
 
   const cable = new Cable();
@@ -203,20 +225,24 @@ test('Cable Internal Bridging', (test) => {
 
   cable.channel('A.A');
   cable.channel('A.B');
-  cable.channel('B.A');
-  cable.channel('B.B');
+  cable.channel('Zero.B.A');
+  cable.channel('Zero.B.B');
 
-  cable.bridge('B', 'A');
+  cable.bridge('Zero.B', 'A');
 
-  test.plan(2);
+  test.plan(3);
 
-  cable.B.subscribe(function(value) {
+  cable.Zero.subscribe(function(value) {
+    test.equal(value, 1, 'bridge is called with local calls and emits');
+  });
+  cable.Zero.B.subscribe(function(value) {
     test.equal(value, 1, 'bridge is called with local calls and broadcasts');
   });
-  cable.B.B.subscribe(function(value) {
+  cable.Zero.B.B.subscribe(function(value) {
     test.equal(value, 1, 'bridge calls with broadcasts');
   });
 
+  cable.A.emit(1);
   cable.A.publish(1);
   cable.A.broadcast(1);
 
