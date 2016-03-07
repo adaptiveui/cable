@@ -150,7 +150,7 @@ test('Cable Broadcast Publish/Subscribe', (test) => {
   cable.channel('one.two');
   cable.channel('one.two.three');
 
-  test.plan(3);
+  test.plan(2);
 
   cable.one.subscribe(function(value) {
     test.equal(value, 4, 'publish sent 4 on channel one');
@@ -210,7 +210,7 @@ test('Cable Internal Bridging', (test) => {
 
   cable.bridge('B', 'A');
 
-  test.plan(3);
+  test.plan(2);
 
   cable.B.subscribe(function(value) {
     test.equal(value, 1, 'bridge is called with local calls and broadcasts');
@@ -236,7 +236,7 @@ test('Cable External Bridging', (test) => {
 
   cable1.bridge(cable2.lookup('B'), 'A');
 
-  test.plan(3);
+  test.plan(2);
 
   cable2.B.subscribe(function(value) {
     test.equal(value, 1, 'bridge is called with local calls and broadcasts');
@@ -251,42 +251,41 @@ test('Cable External Bridging', (test) => {
 });
 
 /*
+test('Cable Recursive Bridging', (test) => {
 
- test('Cable Recursive Bridging', (test) => {
+  const cable1 = new Cable();
+  const cable2 = new Cable();
 
- const cable1 = new Cable();
- const cable2 = new Cable();
+  cable1.channel('A.A');
+  cable1.channel('A.B');
+  cable2.channel('B.A');
+  cable2.channel('B.B');
+  cable2.channel('B.C');
+  cable2.channel('B.C.A');
 
- cable1.channel('A.A');
- cable1.channel('A.B');
- cable2.channel('B.A');
- cable2.channel('B.B');
- cable2.channel('B.C');
- cable2.channel('B.C.A');
+  cable1.bridge(cable2.lookup('B'), 'A');
+  cable2.bridge(cable1.lookup('A'), 'B');
 
- cable1.bridge(cable2.lookup('B'), 'A');
- cable2.bridge(cable1.lookup('A'), 'B');
+  test.plan(5);
 
- test.plan(5);
+  cable2.B.subscribe(function(value) {
+    test.equal(value, 1, 'local calls');
+  });
+  cable2.B.B.subscribe(function(value) {
+    test.equal(value, 1, 'broadcast to level1-child1');
+  });
+  cable2.B.C.subscribe(function(value) {
+    test.equal(value, 1, 'broadcast to level1-child2');
+  });
+  cable2.B.C.A.subscribe(function(value) {
+    test.equal(value, 1, 'broadcast to level2-child1');
+  });
 
- cable2.B.subscribe(function(value) {
- test.equal(value, 1, 'local calls');
- });
- cable2.B.B.subscribe(function(value) {
- test.equal(value, 1, 'broadcast to level1-child1');
- });
- cable2.B.C.subscribe(function(value) {
- test.equal(value, 1, 'broadcast to level1-child2');
- });
- cable2.B.C.A.subscribe(function(value) {
- test.equal(value, 1, 'broadcast to level2-child1');
- });
+  cable1.A.publish(1);
+  cable1.A.broadcast(1);
 
- cable1.A.publish(1);
- cable1.A.broadcast(1);
-
- });
- */
+});
+*/
 
 /*
 
