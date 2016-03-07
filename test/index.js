@@ -357,3 +357,29 @@ test('Cable Receipt Broadcast', (test) => {
   }).broadcast(1);
 
 });
+
+test('Cable Flood', (test) => {
+
+  const cable1 = new Cable();
+  const cable2 = new Cable();
+
+  cable1.channel('A.B.C.D.E');
+  cable1.channel('A.B.F.G.H');
+  cable1.channel('A.C.I.J.K');
+  cable1.channel('A.D.L.M.N');
+
+  cable2.channel('Z.X.Y.W');
+  cable2.channel('Z.X.S.T');
+  cable2.channel('Z.R.Q.P');
+
+  cable1.bridge(cable2);
+
+  test.plan(27);
+
+  Cable.tap(function(cable, value) {
+    test.equal(cable instanceof Cable, true, 'tap will deliver every Cable (' + cable.uniquePath + ')');
+  });
+
+  cable1.flood();
+
+});

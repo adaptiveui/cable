@@ -6,7 +6,7 @@
 
 #### adaptiveui-cable
 
-Cable is a messaging utility with tree and graph message broadcasting combining the centricity of mediators with the semantic protections of signal-slot.
+Cable is a messaging utility focused on supporting complex (tree and graph) connections between user interface components. It supports the signal-slot paradigm for message passing.
 
 ## Install
 
@@ -42,6 +42,16 @@ cable.closed.subscribe(function(a, b) {
 ```
 
 ## Usage
+
+### Cable Vocabulary
+
+- Every `Cable` object is a _signal_ (to `publish` with) and can add _slots_ (to `subscribe` with)
+- A `Cable` is _Mediator_
+- Children connections to a `Cable` objects are defined with `channel`
+- Graph connections to a `Cable` objects are defined with `bridge`
+- A _signal_ is created with `channel`
+- A _slot_ is registered with `subscribe`
+- A _message_ is sent with `flood`, `emit`, `publish`, or `broadcast`
 
 ### Cable API
 
@@ -87,17 +97,19 @@ The characters `/`, `.`, `:` can be used to split channel strings. Whichever you
 
 #### Messaging
 
-There are three directions messages can be passed in the hierarchy: up, across, and down.
+There are three directions messages can be passed in the hierarchy: everywhere, up, across, and down.
 
-| Direction | Method      |
-|:----------|:------------|
-| Up        | `emit`      |
-| Across    | `publish`   |
-| Down      | `broadcast` |
+| Direction  | Method      |
+|:-----------|:------------|
+| Everywhere | `flood`     |
+| Up         | `emit`      |
+| Across     | `publish`   |
+| Down       | `broadcast` |
 
 To invoke all subscribers that the cable has a hierarchical relationship with you would call:
 
 ```javascript
+cable.flood()     // invoke subscribers on all cables
 cable.emit()      // invoke subscribers on parent cables
 cable.publish()   // invoke subscribers on cable
 cable.broadcast() // invoke subscribers on child cables
@@ -162,6 +174,24 @@ cable.p1.broadcast('1');        // Equal(3)
 #### Emitting
 
 Emitting sends messages from a cable to all of it's parents, but similar to broadcasting it does not invoke subscribers on the `Cable`.
+
+If we define four nested `Cable` objects (i.e. four channels) we can invoke each of these manually.
+
+```javascript
+cable.channel('p1.p2.p3.p4');   // Equal(1)
+cable.p1.publish('1');          // Equal(2)
+cable.p1.p2.publish('1');       // Equal(2)
+cable.p1.p2.p3.publish('1');    // Equal(2)
+cable.p1.p2.p3.p4.publish('1'); // Equal(3)
+```
+
+We can accomplish the same with the following; notice that `emit` does not call the current cable's subscribers.
+
+```javascript
+cable.channel('p1.p2.p3.p4');   // Equal(1)
+cable.p1.p2.p3.p4.emit('1');    // Equal(2)
+cable.p1.p2.p3.p4.publish('1'); // Equal(3)
+```
 
 #### Subscribing
 
@@ -236,6 +266,33 @@ cable1.A.publish();
 
 cable1.A.subscribe(function() { /* will be called */ });
 cable2.B.publish();
+```
+
+#### Flooding
+
+Flooding is a mechanism which invokes all subscribers on all cables, if a bridge is established the flood will spill over into that graph of cables.
+
+```javascript
+cable.channel('A:B:C');
+cable.channel('A:D:E');
+cable.flood();
+```
+
+The flood would invoke each subscriber on each cable (A, B, C, D, E) in that order.
+
+#### Tapping
+
+A tap can be placed on `Cable` to debug or respond to all cable invocations. It is called for every cable involved in a signal method (`publish`, `emit`, `broadcast`, and `flood`).
+
+> Useful for debugging
+
+```javascript
+Cable.tap(function(cable) {
+  // all cables A through E will be called once on the flood
+});
+cable.channel('A:B:C');
+cable.channel('A:D:E');
+cable.flood();
 ```
 
 ## License
