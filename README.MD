@@ -31,15 +31,14 @@ This library requires a small set of lodash. Use [lodash-modularize](https://www
 ```js
 import Cable from "adaptiveui-cable"
 
-const cable = Cable();
+const cable = new Cable();
 
 cable.channel('opened');
 cable.channel('closed');
 
-cable.subscribe.closed(function(a, b) {
+cable.closed.subscribe(function(a, b) {
   assert(a === 'info');
-});
-cable.publish.closed('info');
+}).publish('info');
 ```
 
 ## Usage
@@ -51,50 +50,69 @@ cable.publish.closed('info');
 A cable object is Mediator. It is a hub for messaging multiple events along channels.
 
 ```javascript
-const cable = Cable();
+const cable = new Cable();
 ```
 
 The `Cable` object takes the following configuration properties.
 
-| Property       | Type        | Purpose                                                    |
-|:---------------|:------------|:-----------------------------------------------------------|
-| `asynchronous` | __boolean__ | All publish calls happen after the current stack has ended |
+| Property       | Type        | Default Value | Purpose                                                    |
+|:---------------|:------------|:--------------|:-----------------------------------------------------------|
+| `asynchronous` | __boolean__ | `true`        | All publish calls happen after the current stack has ended |
 
 #### Channels
 
-Every message sent on `Cable` must be through a pre-defined channel. Every channel creates a signal function which traps all of the listeners (slots) attached to it.
+A `Cable` object is a signal which can have slots (methods to invoke) attached to it. Every channel defined on a `Cable` creates a new `Cable` with a `channelName`.
 
-> A signal is improves reliability because they exist as objects, so there is less chance of communication breaking down
+> A `Cable` improves reliability because each exists as an object; there is less chance of a communication break down.
 
 ```javascript
 cable.channel('initialized');
 cable.channel('opened');
 cable.channel('closed');
+assert(cable.closed instanceof Cable);
 ```
 
-Channels can be built into communication hierarchies, so that published messages at the top of the communication tree propagate down the channel tree.
+Cables can be built into communication hierarchies, so that published messages at the top of the communication tree propagate down or up the channel tree.
 
 ```javascript
-cable.channel('chat-send');
-cable.channel('chat-startup');
-cable.channel('chat-shutdown');
+cable.channel('chat:send');
+cable.channel('chat:startup');
+cable.channel('chat:shutdown');
 cable.channel('file/send');
 cable.channel('file/startup');
 cable.channel('file/shutdown');
 ```
 
-The characters `/`, `.`, `-`, `:` can be used to split channel strings. Which ever you choose must be used through the entire channel string.
+The characters `/`, `.`, `:` can be used to split channel strings. Whichever you choose must be used through the entire channel string. You cannot define a channel with different split characters like `a/b:c.d`, but `a.b.c.d` or `a:b:c:d` or `a/b/c/d`.
+
+#### Messaging
+
+There are three directions messages can be passed in the hierarchy: up, across, and down.
+
+| Direction | Method      |
+|:----------|:------------|
+| Up        | `emit`      |
+| Across    | `publish`   |
+| Down      | `broadcast` |
+
+To invoke all subscribers that the cable has a hierarchical relationship with you would call:
+
+```javascript
+cable.emit()      // invoke subscribers on parent cables
+cable.publish()   // invoke subscribers on cable
+cable.broadcast() // invoke subscribers on child cables
+```
 
 #### Publishing
 
-Once a channel is defined we can publish messages. You can send as many parameters as needed.
+Once a cable channel is defined we can publish messages. You can send as many parameters as needed.
 
 ```javascript
 cable.channel('opened');
-cable.publish.opened('p1', 'p2');
+cable.opened.publish('p1', 'p2');
 ```
 
-If a channel hierarchy is defined, then it is important to understand the difference between messaging and broadcasting.
+If a channel hierarchy is defined, then it is important to understand the difference between publishing, emitting, and broadcasting.
 
 We will define component validation events.
 
@@ -108,35 +126,42 @@ cable.channel('component:form:checkbox:validate');
 We can validate each component by looping over the types of form components.
 
 ```javascript
-// invoke each validation method
-_.each(cable.publish.component.form, function(type) {
-  type.validate();
+_.each(cable.component.form, function(type) {
+  type.validate.publish();
 });
 ```
 
-##### Publishing Hierarchy
+#### Broadcasting
 
-Every channel parent can be published on. You can:
+While a `publish` will invoke all subscribes on a `Cable`, a broadcast will invoke all subscribers on all channels (i.e. children cables) on that cable, indefinitely.
 
-- publish to a parent channel only
-- publish to a parent channel and all children
-
-To publish on any channel, but not propagate the message down, just invoke any channel on `publish`.
+The loop above which published to all validation methods could be re-written as the following with a `broadcast`.
 
 ```javascript
-cable.channel('p1.p2.p3.p4');
-cable.publish.p1('1');
-cable.publish.p1.p2('2');
-cable.publish.p1.p2.p3('2');
-cable.publish.p1.p2.p3.p4('2');
+cable.component.form.broadcast();
 ```
 
-If you want to publish to the parent and all children, you need to `broadcast`. The following is the same as the code above.
+If we define four nested `Cable` objects (i.e. four channels) we can invoke each of these manually.
 
 ```javascript
-cable.channel('p1.p2.p3.p4');
-cable.publish.p1.broadcast('1');
+cable.channel('p1.p2.p3.p4');   // Equal(1)
+cable.p1.publish('1');          // Equal(2)
+cable.p1.p2.publish('1');       // Equal(3)
+cable.p1.p2.p3.publish('1');    // Equal(3)
+cable.p1.p2.p3.p4.publish('1'); // Equal(3)
 ```
+
+We can accomplish the same with the following; notice that `broadcast` does not call the current cable's subscribers.
+
+```javascript
+cable.channel('p1.p2.p3.p4');   // Equal(1)
+cable.p1.publish('1');          // Equal(2)
+cable.p1.broadcast('1');        // Equal(3)
+```
+
+#### Emitting
+
+Emitting sends messages from a cable to all of it's parents, but similar to broadcasting it does not invoke subscribers on the `Cable`.
 
 #### Subscribing
 
@@ -144,10 +169,9 @@ We want to respond to messages sent. The `subscribe` object mirrors the `publish
 
 ```javascript
 cable.channel('closed');
-cable.subscribe.closed(function(v) {
+cable.closed.subscribe(function(v) {
   assert(v === 1);
-})
-cable.publish.closed(1);
+}).publish(1);
 ```
 
 As many subscribers can be added to any channel. A subscription also works like _slots_, where the object and method are provided and not just a function.
@@ -157,19 +181,19 @@ const component = {
   onClosed() {}
 };
 
-cable.subscribe.closed(component, 'onClosed');
-cable.subscribe.closed(component, component.onClosed);
+cable.closed.subscribe(component, 'onClosed');
+cable.closed.subscribe(component, component.onClosed);
 ```
 
 A child subscriber will be called either by a direct publisher call or a parent broadcast.
 
 ```javascript
 cable.channel('component/select/closed');
-cable.subscribe.component(function(v) { /* will be called */ });
-cable.subscribe.component.select(function(v) { /* will be called */ });
-cable.subscribe.component.select.closed(function(v) { /* will be called */ });
-cable.publish.component('send to only components');
-cable.publish.component.broadcast('send to all components and child channels');
+cable.component.subscribe(function(v) { /* will be called */ });
+cable.component.select.subscribe(function(v) { /* will be called */ });
+cable.component.select.closed.subscribe(function(v) { /* will be called */ });
+cable.component.publish('send to only components');
+cable.component.broadcast.publish('send to all components and child channels');
 ```
 
 #### Bridging
@@ -183,7 +207,7 @@ cable.channel('w.x.y.z');
 cable.bridge('a.b', 'w');
 
 // this will call subscribers on a, a.b, w, w.x, w.x.y, w.x.y.z
-cable.publish.a.broadcast();
+cable.a.broadcast();
 ```
 
 Two different cable objects can be bridged so messages in one will trigger subscribers in the other.
@@ -192,10 +216,10 @@ Two different cable objects can be bridged so messages in one will trigger subsc
 cable1.channel('a.b.c.d');
 cable2.channel('w.x.y.z');
 
-cable1.bridge('a.b', cable2.publish('w.x'));
+cable1.bridge('a.b', cable2.lookup('w.x'));
 
-cable2.subscribe.w.x(function() { /* will be called */ });
-cable1.publish.a.b();
+cable2.w.x.subscribe(function() { /* will be called */ });
+cable1.a.b.publish();
 ```
 
 Channels can be chained in graphs as well as tree structures.
@@ -204,14 +228,14 @@ Channels can be chained in graphs as well as tree structures.
 cable1.channel('A');
 cable2.channel('B');
 
-cable1.bridge('A', cable2.publish.B);
-cable2.bridge('B', cable1.publish.A);
+cable1.bridge('A', cable2.B);
+cable2.bridge('B', cable1.A);
 
-cable2.subscribe.B(function() { /* will be called */ });
-cable1.publish.A();
+cable2.B.subscribe(function() { /* will be called */ });
+cable1.A.publish();
 
-cable1.subscribe.A(function() { /* will be called */ });
-cable2.publish.B();
+cable1.A.subscribe(function() { /* will be called */ });
+cable2.B.publish();
 ```
 
 ## License

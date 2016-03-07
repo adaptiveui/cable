@@ -20,14 +20,12 @@ test('Cable Channel Definition', (test) => {
   cable.channel('W/A/B');
   cable.channel('X.A.B');
   cable.channel('Y:A:B');
-  cable.channel('Z-A-B');
 
   test.equal(cable.W.A.B instanceof Cable, true, 'split on /');
   test.equal(cable.X.A.B instanceof Cable, true, 'split on .');
   test.equal(cable.Y.A.B instanceof Cable, true, 'split on :');
-  test.equal(cable.Z.A.B instanceof Cable, true, 'split on -');
 
-  test.deepEqual(cable._.channels, ['W', 'X', 'Y', 'Z'], 'root cable has all children W, X, Y, Z');
+  test.deepEqual(cable._.channels, ['W', 'X', 'Y'], 'root cable has all children W, X, Y');
   test.deepEqual(cable.W._.channels, ['A'], 'A is a child cable of W');
   test.deepEqual(cable.W.A._.channels, ['B'], 'B is a child cable of A');
   test.end();
@@ -285,42 +283,51 @@ test('Cable Recursive Bridging', (test) => {
 
 });
 
+test('Cable Receipt Publish', (test) => {
 
-/*
+  const cable = new Cable();
 
- test('Cable Receipt', (test) => {
+  cable.channel('B');
 
- const cable = Cable();
+  test.plan(2);
 
- cable.channel('B.A');
- cable.channel('B.B');
- cable.channel('B.C');
- cable.channel('B.C.A');
+  cable.B.subscribe(function(value) {
+    test.equal(value, 1, 'broadcast to level1-child1');
+    return 1;
+  });
 
- test.plan(8);
+  cable.B.receipt(function(value) {
+    test.equal(value, 1, 'receipt is always 1');
+  }).publish(1);
 
- cable.subscribe.B(function(value) {
- test.equal(value, 1, 'local calls');
- return 1;
- });
- cable.subscribe.B.B(function(value) {
- test.equal(value, 1, 'broadcast to level1-child1');
- return 1;
- });
- cable.subscribe.B.C(function(value) {
- test.equal(value, 1, 'broadcast to level1-child2');
- return 1;
- });
- cable.subscribe.B.C.A(function(value) {
- test.equal(value, 1, 'broadcast to level2-child1');
- return 1;
- });
+});
 
- cable.publish.B.receipt(function(value) {
- test.equal(value, 1, 'receipt is always 1');
- }).broadcast(1);
+test('Cable Receipt Broadcast', (test) => {
 
- test.end();
+  const cable = new Cable();
 
- });
- */
+  cable.channel('B.A');
+  cable.channel('B.B');
+  cable.channel('B.C');
+  cable.channel('B.C.A');
+
+  test.plan(6);
+
+  cable.B.B.subscribe(function(value) {
+    test.equal(value, 1, 'broadcast to level1-child1');
+    return 1;
+  });
+  cable.B.C.subscribe(function(value) {
+    test.equal(value, 1, 'broadcast to level1-child2');
+    return 1;
+  });
+  cable.B.C.A.subscribe(function(value) {
+    test.equal(value, 1, 'broadcast to level2-child1');
+    return 1;
+  });
+
+  cable.B.receipt(function(value) {
+    test.equal(value, 1, 'receipt is always 1');
+  }).broadcast(1);
+
+});
