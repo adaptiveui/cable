@@ -3,6 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/adaptiveui/cable/badge.svg?branch=master)](https://coveralls.io/github/adaptiveui/cable?branch=master)
 [![Build Status](https://travis-ci.org/adaptiveui/cable.svg?branch=master)](https://travis-ci.org/adaptiveui/cable)
 [![Dependency Status](https://david-dm.org/adaptiveui/cable.svg)](https://david-dm.org/adaptiveui/cable.svg?style=flat-square)
+[![npm version](https://badge.fury.io/js/adaptiveui-cable.svg)](https://badge.fury.io/js/adaptiveui-cable)
 
 #### adaptiveui-cable
 
