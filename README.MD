@@ -1,11 +1,11 @@
 # Cable
 
-[![Coverage Status](https://coveralls.io/repos/github/adaptiveui/cable/badge.svg?branch=master)](https://coveralls.io/github/adaptiveui/cable?branch=master)
-[![Build Status](https://travis-ci.org/adaptiveui/cable.svg?branch=master)](https://travis-ci.org/adaptiveui/cable)
-[![Dependency Status](https://david-dm.org/adaptiveui/cable.svg)](https://david-dm.org/adaptiveui/cable.svg?style=flat-square)
-[![npm version](https://badge.fury.io/js/adaptiveui-cable.svg)](https://badge.fury.io/js/adaptiveui-cable)
+[![Coverage Status](https://coveralls.io/repos/github/simple-ui/cable/badge.svg?branch=master)](https://coveralls.io/github/simple-ui/cable?branch=master)
+[![Build Status](https://travis-ci.org/simple-ui/cable.svg?branch=master)](https://travis-ci.org/simple-ui/cable)
+[![Dependency Status](https://david-dm.org/simple-ui/cable.svg)](https://david-dm.org/simple-ui/cable.svg?style=flat-square)
+[![npm version](https://badge.fury.io/js/simple-ui_cable.svg)](https://badge.fury.io/js/simple-ui_cable)
 
-#### adaptiveui-cable
+#### simple-ui_cable
 
 Cable is a messaging utility focused on supporting complex (tree and graph) connections between user interface components. It supports the signal-slot paradigm for message passing.
 
@@ -14,13 +14,13 @@ Cable is a messaging utility focused on supporting complex (tree and graph) conn
 Install with npm.
 
 ```sh
-npm install --save adaptiveui-cable
+npm install --save simple-ui_cable
 ```
 
 Install with bower.
 
 ```sh
-bower install --save adaptiveui-cable
+bower install --save simple-ui_cable
 ```
 
 ### Lodash Dependency
@@ -29,8 +29,8 @@ This library requires a small set of lodash. Use [lodash-modularize](https://www
 
 ## Quick Usage
 
-```js
-import Cable from "adaptiveui-cable"
+```javascript
+import Cable from "simple-ui_cable"
 
 const cable = new Cable();
 
@@ -298,7 +298,7 @@ cable.flood();
 
 ## License
 
-MIT © [mwjaworski](http://adaptiveui.io)
+MIT © [mwjaworski](http://simple-ui.io)
 
 This software is released under the MIT license:
 
