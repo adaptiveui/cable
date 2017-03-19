@@ -25,4 +25,4 @@
 
 ### 1.0.0
 
-* INITIAL adaptiveui-cable commit
+* INITIAL simpleui-cable commit
