@@ -3,9 +3,9 @@
 [![Coverage Status](https://coveralls.io/repos/github/simple-ui/cable/badge.svg?branch=master)](https://coveralls.io/github/simple-ui/cable?branch=master)
 [![Build Status](https://travis-ci.org/simple-ui/cable.svg?branch=master)](https://travis-ci.org/simple-ui/cable)
 [![Dependency Status](https://david-dm.org/simple-ui/cable.svg)](https://david-dm.org/simple-ui/cable.svg?style=flat-square)
-[![npm version](https://badge.fury.io/js/simple-ui_cable.svg)](https://badge.fury.io/js/simple-ui_cable)
+[![npm version](https://badge.fury.io/js/@simple-ui/cable.svg)](https://badge.fury.io/js/@simple-ui/cable)
 
-#### simple-ui_cable
+#### @simple-ui/cable
 
 Cable is a messaging utility focused on supporting complex (tree and graph) connections between user interface components. It supports the signal-slot paradigm for message passing.
 
@@ -14,13 +14,13 @@ Cable is a messaging utility focused on supporting complex (tree and graph) conn
 Install with npm.
 
 ```sh
-npm install --save simple-ui_cable
+npm install --save @simple-ui/cable
 ```
 
 Install with bower.
 
 ```sh
-bower install --save simple-ui_cable
+bower install --save @simple-ui/cable
 ```
 
 ### Lodash Dependency
@@ -30,7 +30,7 @@ This library requires a small set of lodash. Use [lodash-modularize](https://www
 ## Quick Usage
 
 ```javascript
-import Cable from "simple-ui_cable"
+import Cable from "@simple-ui/cable"
 
 const cable = new Cable();
 

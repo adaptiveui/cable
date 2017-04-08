@@ -10,6 +10,10 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+### 1.1.3
+
+- MOVED to @simple-ui npm organization
+
 ### 1.1.2
 
 - ADDED JSCS support
